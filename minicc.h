@@ -66,6 +66,7 @@ typedef enum {
 
   ND_IF,
   ND_WHILE,
+  ND_FOR,
 } NodeKind;
 
 typedef struct LVar LVar;
@@ -85,10 +86,12 @@ struct Node {
     Node *lhs;
     Node *rhs;
 
-    // "if" statement
+    // "if" or "for" statement
     Node *cond;
     Node *then;
     Node *els;
+    Node *init;
+    Node *inc;
 
     int val;
     int offset;
