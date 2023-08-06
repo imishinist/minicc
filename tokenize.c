@@ -31,7 +31,16 @@ bool consume(char *op) {
         memcmp(token->str, op, token->len))
         return false;
     token = token->next;
-    return true;        
+    return true;
+}
+
+Token *consume_ident() {
+    if (token->kind != TK_IDENT)
+        return NULL;
+
+    Token *ret = token;
+    token = token->next;
+    return ret;
 }
 
 // 次のトークンが期待している記号のときは、トークンを一つ読み進める。
@@ -80,7 +89,7 @@ Token *tokenize() {
             p++;
             continue;
         }
-
+        
         if (startswith(p, "==") || startswith(p, "!=") ||
             startswith(p, "<=") || startswith(p, ">=")) {
             cur = new_token(TK_RESERVED, cur, p, 2);
@@ -89,8 +98,14 @@ Token *tokenize() {
         }
 
         // Punctuator
-        if (strchr("+-*/()<>", *p)) {
+        if (strchr("+-*/()<>;=", *p)) {
             cur = new_token(TK_RESERVED, cur, p++, 1);
+            continue;
+        }
+
+        // ident
+        if ('a' <= *p && *p <= 'z') {
+            cur = new_token(TK_IDENT, cur, p++, 1);
             continue;
         }
 

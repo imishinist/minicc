@@ -10,8 +10,8 @@ int main(int argc, char **argv) {
     }
     user_input = argv[1];
     token = tokenize();
-    Node *node = expr();
+    program();
 
-    codegen(node);
+    codegen();
     return 0;
 }
