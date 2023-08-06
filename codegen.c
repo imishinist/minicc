@@ -1,5 +1,10 @@
 #include "minicc.h"
 
+static int count(void) {
+    static int i = 1;
+    return i++;
+}
+
 void codegen() {
     // アセンブリの前半部分を出力
     printf(".intel_syntax noprefix\n");
@@ -9,7 +14,6 @@ void codegen() {
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
     printf("  sub rsp, 208\n");
-
     for (int i = 0; code[i]; i++) {
         gen(code[i]);
         printf("  pop rax\n");
@@ -35,6 +39,26 @@ void gen_lval(Node *node) {
 //
 void gen(Node *node) {
     switch (node->kind) {
+    case ND_IF:
+        int c = count();
+        if (node->els) {
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .L.else.%d\n", c);
+            gen(node->then);
+            printf("  jmp .L.end.%d\n", c);
+            printf(".L.else.%d:\n", c);
+            gen(node->els);
+            printf(".L.end.%d:\n", c);
+        } else {
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .L.end.%d\n", c);
+            gen(node->then);
+            printf(".L.end.%d:\n", c);
+        }
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;
@@ -58,7 +82,7 @@ void gen(Node *node) {
         printf("  pop rax\n");
         printf("  mov rsp, rbp\n");
         printf("  pop rbp\n");
-        printf("  ret\n");        
+        printf("  ret\n");
         return;
     }
 

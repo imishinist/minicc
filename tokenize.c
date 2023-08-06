@@ -34,17 +34,8 @@ bool consume(char *op) {
     return true;
 }
 
-Token *consume_return() {
-    if (token->kind != TK_RETURN)
-        return NULL;
-
-    Token *ret = token;
-    token = token->next;
-    return ret;
-}
-
-Token *consume_ident() {
-    if (token->kind != TK_IDENT)
+Token *consume_kind(TokenKind tk) {
+    if (token->kind != tk)
         return NULL;
 
     Token *ret = token;
@@ -110,6 +101,26 @@ Token *tokenize() {
             continue;
         }
 
+        if (strncmp(p, "if", 2) == 0 && !is_alnum(p[2])) {
+            cur = new_token(TK_IF, cur, p, 2);
+            p += 2;
+            continue;
+        }
+        if (strncmp(p, "else", 4) == 0 && !is_alnum(p[4])) {
+            cur = new_token(TK_ELSE, cur, p, 4);
+            p += 4;
+            continue;
+        }
+        if (strncmp(p, "for", 3) == 0 && !is_alnum(p[3])) {
+            cur = new_token(TK_FOR, cur, p, 3);
+            p += 3;
+            continue;
+        }
+        if (strncmp(p, "while", 5) == 0 && !is_alnum(p[5])) {
+            cur = new_token(TK_WHILE, cur, p, 5);
+            p += 5;
+            continue;
+        }
         if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
             cur = new_token(TK_RETURN, cur, p, 6);
             p += 6;

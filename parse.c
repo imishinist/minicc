@@ -20,7 +20,7 @@ LVar *locals;
 Node *code[100];
 
 // program = stmt*
-Node *program() { 
+Node *program() {
     int i = 0;
     while (!at_eof())
         code[i++] = stmt();
@@ -28,19 +28,33 @@ Node *program() {
 }
 
 // stmt = expr ";"
+//      | "if" "(" expr ")" stmt ("else" stmt)?
+//      | "while" "(" expr ")" stmt
+//      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 //      | "return" expr ";"
 Node *stmt() {
-    Node *node;
-
-    Token *ty = consume_return();
-    if (ty) {
-        node = calloc(1, sizeof(Node));
+    if (consume_kind(TK_RETURN)) {
+        Node *node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
-    } else {
-        node = expr();
+        expect(";");
+        return node;
     }
-   
+
+    if (consume_kind(TK_IF)) {
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        expect("(");
+        node->cond = expr();
+        expect(")");
+        node->then = stmt();
+        if (consume_kind(TK_ELSE)) {
+            node->els = stmt();
+        }
+        return node;
+    }
+
+    Node *node = expr();
     expect(";");
     return node;
 }
@@ -89,7 +103,7 @@ Node *relational() {
     }
 }
 
-// 
+//
 // add = mul ("+" mul | "-" mul)*
 Node *add() {
     Node *node = mul();
@@ -133,7 +147,7 @@ Node *primary() {
         expect(")");
         return node;
     }
-    Token *tok = consume_ident();
+    Token *tok = consume_kind(TK_IDENT);
     if (tok) {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
