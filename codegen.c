@@ -38,9 +38,10 @@ void gen_lval(Node *node) {
 // Code generator
 //
 void gen(Node *node) {
+    int c;
     switch (node->kind) {
     case ND_IF:
-        int c = count();
+        c = count();
         if (node->els) {
             gen(node->cond);
             printf("  pop rax\n");
@@ -59,6 +60,16 @@ void gen(Node *node) {
             gen(node->then);
             printf(".L.end.%d:\n", c);
         }
+    case ND_WHILE:
+        c = count();
+        printf(".L.begin.%d:\n", c);
+        gen(node->cond);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je .L.end.%d\n", c);
+        gen(node->then);
+        printf("  jmp .L.begin.%d\n", c);
+        printf(".L.end.%d:\n", c);
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;

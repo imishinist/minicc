@@ -65,6 +65,7 @@ typedef enum {
   ND_RETURN, // return
 
   ND_IF,
+  ND_WHILE,
 } NodeKind;
 
 typedef struct LVar LVar;
