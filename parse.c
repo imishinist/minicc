@@ -28,8 +28,19 @@ Node *program() {
 }
 
 // stmt = expr ";"
+//      | "return" expr ";"
 Node *stmt() {
-    Node *node = expr();
+    Node *node;
+
+    Token *ty = consume_return();
+    if (ty) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->lhs = expr();
+    } else {
+        node = expr();
+    }
+   
     expect(";");
     return node;
 }

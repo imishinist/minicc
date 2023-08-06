@@ -54,4 +54,8 @@ assert 10 'a = 2; z = 2 + 3; a * z;'
 
 assert 6 'foo = 1; bar = 2 + 3; foo + bar;'
 
+assert 5 'return 5;'
+assert 10 'a = 2; z = 2 + 3; return a * z;'
+assert 6 'foo = 1; bar = 2 + 3; return a = foo + bar;'
+
 echo OK
