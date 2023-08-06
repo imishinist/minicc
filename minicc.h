@@ -34,6 +34,8 @@ Token *consume_ident();
 void expect(char *op);
 int expect_number();
 bool at_eof();
+bool is_ident1(char c);
+bool is_ident2(char c);
 Token *tokenize();
 
 //
@@ -52,10 +54,19 @@ typedef enum {
   ND_NE, // !=
   ND_LT, // <
   ND_LE, // <=
-  
+
   ND_ASSIGN, // =
   ND_LVAR,   // local variable
 } NodeKind;
+
+typedef struct LVar LVar;
+
+struct LVar {
+    LVar *next;
+    char *name;
+    int len;
+    int offset;
+};
 
 // AST node type
 typedef struct Node Node;
@@ -80,6 +91,8 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+
+LVar *find_lvar(Token *tok);
 
 //
 // codegen.c

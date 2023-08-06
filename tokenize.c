@@ -74,8 +74,14 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     return tok;
 }
 
-bool startswith(char *p, char *q) {
-    return memcmp(p, q, strlen(q)) == 0;
+bool startswith(char *p, char *q) { return memcmp(p, q, strlen(q)) == 0; }
+
+bool is_ident1(char c) {
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+bool is_ident2(char c) {
+    return is_ident1(c) || ('0' <= c && c <= '9');
 }
 
 Token *tokenize() {
@@ -89,7 +95,7 @@ Token *tokenize() {
             p++;
             continue;
         }
-        
+
         if (startswith(p, "==") || startswith(p, "!=") ||
             startswith(p, "<=") || startswith(p, ">=")) {
             cur = new_token(TK_RESERVED, cur, p, 2);
@@ -103,22 +109,26 @@ Token *tokenize() {
             continue;
         }
 
-        // ident
-        if ('a' <= *p && *p <= 'z') {
-            cur = new_token(TK_IDENT, cur, p++, 1);
+        // Identifier
+        if (is_ident1(*p)) {
+            char *start = p;
+            do {
+                p++;
+            } while (is_ident2(*p));
+            cur = new_token(TK_IDENT, cur, start, p - start);
             continue;
         }
 
         if (isdigit(*p)) {
             cur = new_token(TK_NUM, cur, p, 0);
-            char *q = p;            
+            char *q = p;
             cur->val = strtol(p, &p, 10);
             cur->len = p - q;
-            
+
             continue;
         }
         error_at(p, "invalid token");
     }
     new_token(TK_EOF, cur, p, 0);
-    return head.next;    
+    return head.next;
 }
