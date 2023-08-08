@@ -1,4 +1,5 @@
 #include "minicc.h"
+#include <string.h>
 
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
@@ -68,8 +69,8 @@ Node *stmt() {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_FOR;
         expect("(");
-        if (!consume(";")) {            
-            node->init = expr();            
+        if (!consume(";")) {
+            node->init = expr();
             expect(";");
         }
 
@@ -77,12 +78,12 @@ Node *stmt() {
             node->cond = expr();
             expect(";");
         }
-        
-        if (!consume(")")) {            
+
+        if (!consume(")")) {
             node->inc = expr();
             expect(")");
         }
-        
+
         node->then = stmt();
 
         return node;
@@ -174,7 +175,7 @@ Node *unary() {
     return primary();
 }
 
-// primary = "(" expr ")" | num | ident
+// primary = "(" expr ")" | ident ("(" ")")? | num
 Node *primary() {
     if (consume("(")) {
         Node *node = expr();
@@ -183,6 +184,14 @@ Node *primary() {
     }
     Token *tok = consume_kind(TK_IDENT);
     if (tok) {
+        if (consume("(")) {
+            expect(")");
+            Node *node = calloc(1, sizeof(Node));
+            node->kind = ND_FUNCALL;
+            node->funcname = strndup(tok->str, tok->len);
+            return node;
+        }
+
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
 

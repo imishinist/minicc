@@ -60,6 +60,7 @@ void gen(Node *node) {
             gen(node->then);
             printf(".L.end.%d:\n", c);
         }
+        return;
     case ND_WHILE:
         c = count();
         printf(".L.begin.%d:\n", c);
@@ -70,6 +71,7 @@ void gen(Node *node) {
         gen(node->then);
         printf("  jmp .L.begin.%d\n", c);
         printf(".L.end.%d:\n", c);
+        return;
     case ND_FOR:
         c = count();
         if (node->init)
@@ -84,7 +86,12 @@ void gen(Node *node) {
         if (node->inc)
             gen(node->inc);
         printf("  jmp .L.begin.%d\n", c);
-        printf(".L.end.%d:\n", c);        
+        printf(".L.end.%d:\n", c);
+        return;
+    case ND_FUNCALL:
+        printf("  mov rax, 0\n");
+        printf("  call %s\n", node->funcname);
+        return;
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;

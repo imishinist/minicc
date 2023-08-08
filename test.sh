@@ -1,11 +1,17 @@
 #!/bin/bash
 
+cat <<EOF | /bin/cc -xc -c -o tmp2.o -
+#include<stdio.h>
+long long ret3() { printf("OK\n"); return 3; }
+long long ret5() { printf("OK\n"); return 5; }
+EOF
+
 assert() {
     expected="$1"
     input="$2"
 
     ./minicc "$input" > tmp.s
-    /bin/cc -o tmp tmp.s -fuse-ld=mold
+    /bin/cc -o tmp tmp.s tmp2.o -fuse-ld=mold
     ./tmp
     actual="$?"
 
@@ -66,5 +72,10 @@ assert 10 'i = 0; while(i < 10) i = i + 1; return i;'
 
 assert 55 'i = 0; j = 0; for(i = 0; i <= 10; i = i + 1) j = i + j; return j;'
 assert 3 'for (;;) return 3; return 5;'
+
+# assert 3 'return ret3();'
+# assert 5 'return ret5();'
+assert 1 'ret3(); return 1;'
+assert 1 'ret5(); return 1;'
 
 echo OK

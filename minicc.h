@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -67,6 +69,8 @@ typedef enum {
   ND_IF,
   ND_WHILE,
   ND_FOR,
+
+  ND_FUNCALL, // function call
 } NodeKind;
 
 typedef struct LVar LVar;
@@ -92,6 +96,8 @@ struct Node {
     Node *els;
     Node *init;
     Node *inc;
+
+    char *funcname;
 
     int val;
     int offset;
