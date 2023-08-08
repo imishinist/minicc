@@ -2,6 +2,10 @@
 
 cat <<EOF | /bin/cc -xc -c -o tmp2.o -
 #include<stdio.h>
+int call6arg(int a1, int a2, int a3, int a4, int a5, int a6) {
+  printf("%d\n", a1 + a2 + a3 + a4 + a5 + a6);
+}
+
 long long ret3() { printf("OK\n"); return 3; }
 long long ret5() { printf("OK\n"); return 5; }
 EOF
@@ -76,6 +80,7 @@ assert 3 'for (;;) return 3; return 5;'
 # assert 3 'return ret3();'
 # assert 5 'return ret5();'
 assert 1 'ret3(); return 1;'
-assert 1 'ret5(); return 1;'
+assert 2 'ret5(); return 2;'
+assert 10 'call6arg(1,2,3,4,5,6); return 10;'
 
 echo OK

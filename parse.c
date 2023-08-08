@@ -175,46 +175,62 @@ Node *unary() {
     return primary();
 }
 
-// primary = "(" expr ")" | ident ("(" ")")? | num
+// funcall = ident "(" (assign ("," assign)*)? ")"
+Node *funcall(Token *tok) {
+    Node head = {};
+    Node *cur = &head;
+
+    while(!consume(")")) {
+        if (cur != &head)
+            expect(",");
+        cur = cur->next = assign();
+    }
+
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_FUNCALL;
+    node->funcname = strndup(tok->str, tok->len);
+    node->args = head.next;
+    return node;
+}
+
+// primary = "(" expr ")" | ident func-args? | num
 Node *primary() {
     if (consume("(")) {
         Node *node = expr();
         expect(")");
         return node;
     }
+
     Token *tok = consume_kind(TK_IDENT);
-    if (tok) {
-        if (consume("(")) {
-            expect(")");
-            Node *node = calloc(1, sizeof(Node));
-            node->kind = ND_FUNCALL;
-            node->funcname = strndup(tok->str, tok->len);
-            return node;
-        }
+    if (!tok)
+        return new_node_num(expect_number());
 
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-
-        LVar *lvar = find_lvar(tok);
-        if (lvar) {
-            node->offset = lvar->offset;
-        } else {
-            lvar = calloc(1, sizeof(LVar));
-            lvar->next = locals;
-            lvar->name = tok->str;
-            lvar->len = tok->len;
-            if (locals) {
-                lvar->offset = locals->offset + 8;
-            } else {
-                lvar->offset = 0;
-            }
-            node->offset = lvar->offset;
-            locals = lvar;
-        }
-        return node;
+    // function call
+    if (consume("(")) {
+        return funcall(tok);
     }
 
-    return new_node_num(expect_number());
+    // variable
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_LVAR;
+
+    LVar *lvar = find_lvar(tok);
+    if (lvar) {
+        node->offset = lvar->offset;
+    } else {
+        lvar = calloc(1, sizeof(LVar));
+        lvar->next = locals;
+        lvar->name = tok->str;
+        lvar->len = tok->len;
+        if (locals) {
+            lvar->offset = locals->offset + 8;
+        } else {
+            lvar->offset = 0;
+        }
+        node->offset = lvar->offset;
+        locals = lvar;
+    }
+    return node;
 }
 
 LVar *find_lvar(Token *tok) {

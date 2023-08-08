@@ -87,6 +87,7 @@ typedef struct Node Node;
 
 struct Node {
     NodeKind kind;
+    Node *next;
     Node *lhs;
     Node *rhs;
 
@@ -97,7 +98,9 @@ struct Node {
     Node *init;
     Node *inc;
 
+    // "function calling"
     char *funcname;
+    Node *args;
 
     int val;
     int offset;
